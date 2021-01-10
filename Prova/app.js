@@ -5,7 +5,7 @@ const bodyParser = require ("body-parser")
 const http = require('http')
 const { stringify } = require('querystring')
 var querystring = require('querystring')
-//var Connection = require('tedious').Connection;
+var Connection = require('tedious').Connection;
 const app = express ()
 
 //Config
@@ -14,6 +14,10 @@ const app = express ()
     var config = {
         server: 'virtual2.febracorp.org.br',
         options: {
+          cryptoCredentialsDetails: {
+            minVersion: 'TLSv1'
+        },
+          trustServerCertificate: true,
           database: "CONTOSO"
         },
         authentication: {
@@ -24,16 +28,6 @@ const app = express ()
           }
         }
       }
-
-      /*var connection = new Connection(config);
-
-      connection.on('connect', function(err) {
-        if(err) {
-          console.log('Error: ', err)
-        }
-        // If no error, then good to go...
-        executeStatement();
-      });*/
 
     //Handlebars
     app.engine('handlebars', handlebars({defaultLayout: 'main'}))
@@ -85,6 +79,15 @@ const app = express ()
                     const s_code = code.match(sobrenomeReg)[1];
                     const e_code = code.match(emailReg)[1];
                     console.log(`BODY: ${chunk}`);
+                    var connection = new Connection(config);
+
+                    connection.on('connect', function(err) {
+                      if(err) {
+                        console.log('Error: ', err)
+                      }
+                      // If no error, then good to go...
+                      executeStatement();
+                    })
                 });
                 res.on('end', () => {
                   console.log('No more data in response.');
